@@ -2,6 +2,9 @@
 This practice is using the Memories Forever Database on the NAIT DMIT Moodle for DMIT1508 - Database Fundamentals.
 
 The Memories Forever database and code was created by DMIT Staff.
+Note: The check constrant for HireDate in the Staff table and the InDate & OutDate in the project table need to be reversed
+	constraint ck_hiredate check(HireDate <= getdate())
+	constraint ck_dates check (InDate <=OutDate)
 
 The data and inserts in this sql file were created by Aric Smith for Supplemental Learning sessions in Fall 2018.
 Contact info: arics@nait.ca or aricsmith35@gmail.com
@@ -100,9 +103,9 @@ Insert into ProjectType(ProjectTypeCode, ProjectTypeDescription) Values (5, 'Oth
 
 --Insert Clients - Note ClientID is an identity
 Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Customer', 'Gary', 'Dale', 7805687895, 'GDale@gmail.com', '123 Apple St', 'Tomlinson', 'AB', 'T6H1C2') --id 1
-Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Customer', 'Dan', 'Ellery', 7806842395, 'DEll@gmail.com', '6978 52st', 'Tomlinson', 'AB', 'T8J2U8') --id 2
+Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Customer', 'Dan', 'Ellery', 7806842395, 'DEll@gmail.com', '6978 52st', 'Magrath', 'AB', 'T8J2U8') --id 2
 Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Customer', 'Quinn', 'McMillan', 7803268574, 'QuinMcM@gmail.com', '89636 58Ave', 'Tomlinson', 'AB', 'T2Y6V7') --id 3
-Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Customer', 'Ernie', 'Carter', 7809362056, 'ErnCarter@gmail.com', '95874 10st', 'Tomlinson', 'AB', 'T8H6S8') --id 4
+Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Customer', 'Ernie', 'Carter', 7809362056, 'ErnCarter@gmail.com', '95874 10st', 'Westbrook', 'AB', 'T8H6S8') --id 4
 Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Customer', 'Dennis', 'Helgason', 7809852268, 'DennisHelg@gmail.com', '98112 18Ave', 'Tomlinson', 'AB', 'T6J8A1') --id 5
 Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Tomlinson High School', 'Jim', 'Rutherford', 7804679685, 'JRutherford@TomlinsonHigh.com', '10 Pear St', 'Tomlinson', 'AB', 'T9T1Y6') --id 6
 Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Tomlinson Minor Hockey', 'Warren', 'Jackson', 7808856468, 'HeadCoach@TomlinsonHockey.com', '11 Pear St', 'Tomlinson', 'AB', 'T9T1Y7') --id 7
@@ -236,6 +239,82 @@ Where StaffFirstName not like '____'
 Select count(StaffID)
 From Staff
 Where StaffFirstName like '____'
+
+
+
+/*
+------------------------------------------------------------------------------------------
+Simple Selects with date or string functions
+------------------------------------------------------------------------------------------
+*/
+
+--What is the length of the last names and the last name of our clients?
+Select Len(ClientLastName), ClientLastName
+From Client
+
+--What staff members have a last name 6 letters long?
+Select StaffFirstName + ' ' + StaffLastName as 'Staff Name'
+From Staff
+Where Len(StaffLastName) = 6
+
+--What are the first 2 letters of each clients name?
+Select Left(ClientFirstName, 2)
+From Client
+
+--Select clients name in the format of first letter of first name.last name Ex J.Doe
+Select Left(ClientFirstName, 1) + '.' + ClientLastName
+From Client
+
+--Select the staff initials
+Select Left(StaffFirstName, 1) + Left(StaffLastName, 1) as 'Staff Initials'
+From Staff
+
+--What is the last 2 letters of each Item description
+Select Right(ItemDescription, 2)
+From Item
+
+--What is the last 3 characters of each clients postal code?
+Select Right(PC, 3)
+From Client
+
+--What are 2nd and 3rd letter of each project description?
+Select Substring(ProjectDescription, 2, 2)
+From Project
+
+--What about the 2nd and 5th letter of each client's organization?
+Select Substring(Organization, 2, 1), SUBSTRING(Organization, 5, 1)
+From Client
+
+--What are all the client names in reverse?
+Select Reverse(ClientFirstName + ' ' + ClientLastName)
+From Client
+
+--What are all the client postal codes in lower case?
+Select Lower(PC)
+From Client
+
+--What about all the client addresses in Upper case?
+Select Upper(Address)
+From Client
+
+--What year was the owner hired/the company started? (StaffID = 1)
+Select Datepart(yy, HireDate)
+From Staff
+Where StaffID = 1
+
+Select year(HireDate)
+From Staff
+Where StaffID = 1
+
+--What month was the first project started in?
+Select DatePart(mm, InDate)
+From Project
+Where ProjectID = 1
+
+Select Month(InDate)
+From Project
+Where ProjectID = 1
+
 
 
 /*
@@ -485,10 +564,11 @@ GO
 ------------------------------------------------------------------------------------------
 Views
 Note: These can be finicky with intellisense. Ctrl + Shift + R refreshes intellisense
+	  Views need to be the only statement in a batch. GO makes sure that a new batch starts
 ------------------------------------------------------------------------------------------
 */
 
-GO -- Views need to be the only statement in a batch. GO makes sure that a new batch starts
+--Let's make a view that has the clients, their project type, project description, and the staff members that helped them and their type description
 
 --Let's make a view that has the clients, their project type, project description, and the staff members that helped them and their type description
 Create View ClientsProjectsStaff
@@ -554,8 +634,29 @@ Select StaffFirstName + ' ' + StaffLastName as 'Staff Name'
 From Staff
 Where StaffID not in (Select StaffID from Project)
 
+--What customers have not done a project?
+Select ClientFirstName + ' ' + ClientLastName as 'Customer Name'
+From Client
+Where ClientID not in (Select ClientID from Project)
 
---Nested subqueries - Subquery in a subquery - Subqueryception!
+--What staff have a higher than average wage?
+Select StaffFirstName + ' ' + StaffLastName as 'Staff Name'
+From Staff
+Where Wage > (Select Avg(Wage) From Staff)
+
+--Where are our clients from - How many from each city?
+Select City, Count(ClientID) as 'Amount of Clients'
+from Client
+Group By city
+Having Count(ClientID) >= Some (Select Count(ClientID) from Client Group by City)
+
+--Which city has the most students?
+Select City, Count(ClientID) as 'Amount of Clients'
+from Client
+Group By city
+Having Count(ClientID) >= All (Select Count(ClientID) from Client Group by City)
+
+--More of a challenge - Nested subqueries - Subquery in a subquery - Subqueryception!
 --What are the staff types from the previous query?
 Select StaffTypeDescription
 From StaffType
@@ -569,4 +670,3 @@ From itemType
 Where ItemTypeID not in (Select ItemTypeID
                      From Item
                      Where ItemID in (Select ItemID from ProjectItem))
-

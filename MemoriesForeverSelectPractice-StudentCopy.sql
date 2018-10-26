@@ -2,6 +2,9 @@
 This practice is using the Memories Forever Database on the NAIT DMIT Moodle for DMIT1508 - Database Fundamentals.
 
 The Memories Forever database and code was created by DMIT Staff.
+Note: The check constrant for HireDate in the Staff table and the InDate & OutDate in the project table need to be reversed
+	constraint ck_hiredate check(HireDate <= getdate())
+	constraint ck_dates check (InDate <=OutDate)
 
 The data and inserts in this sql file were created by Aric Smith for Supplemental Learning sessions in Fall 2018.
 Contact info: arics@nait.ca or aricsmith35@gmail.com
@@ -100,9 +103,9 @@ Insert into ProjectType(ProjectTypeCode, ProjectTypeDescription) Values (5, 'Oth
 
 --Insert Clients - Note ClientID is an identity
 Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Customer', 'Gary', 'Dale', 7805687895, 'GDale@gmail.com', '123 Apple St', 'Tomlinson', 'AB', 'T6H1C2') --id 1
-Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Customer', 'Dan', 'Ellery', 7806842395, 'DEll@gmail.com', '6978 52st', 'Tomlinson', 'AB', 'T8J2U8') --id 2
+Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Customer', 'Dan', 'Ellery', 7806842395, 'DEll@gmail.com', '6978 52st', 'Magrath', 'AB', 'T8J2U8') --id 2
 Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Customer', 'Quinn', 'McMillan', 7803268574, 'QuinMcM@gmail.com', '89636 58Ave', 'Tomlinson', 'AB', 'T2Y6V7') --id 3
-Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Customer', 'Ernie', 'Carter', 7809362056, 'ErnCarter@gmail.com', '95874 10st', 'Tomlinson', 'AB', 'T8H6S8') --id 4
+Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Customer', 'Ernie', 'Carter', 7809362056, 'ErnCarter@gmail.com', '95874 10st', 'Westbrook', 'AB', 'T8H6S8') --id 4
 Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Customer', 'Dennis', 'Helgason', 7809852268, 'DennisHelg@gmail.com', '98112 18Ave', 'Tomlinson', 'AB', 'T6J8A1') --id 5
 Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Tomlinson High School', 'Jim', 'Rutherford', 7804679685, 'JRutherford@TomlinsonHigh.com', '10 Pear St', 'Tomlinson', 'AB', 'T9T1Y6') --id 6
 Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Tomlinson Minor Hockey', 'Warren', 'Jackson', 7808856468, 'HeadCoach@TomlinsonHockey.com', '11 Pear St', 'Tomlinson', 'AB', 'T9T1Y7') --id 7
@@ -152,28 +155,22 @@ Simple Selects
 */
 
 -- Select all the projects and their info from the project table
-Select ProjectId, ProjectDescription, InDate, OutDate, Estimate, ProjectTypeCode, ClientID, SubTotal, GST, Total, StaffID
-From    Project
+
 
 -- Who are the clients we have in this database?
-Select ClientFirstName + ' ' + ClientLastName as 'Client Name'
-From Client
+
 
 -- How many people work here?
-Select count(StaffID)
-From Staff
+
 
 -- What are the names of the workers?
-Select StaffFirstName, StaffLastName
-From Staff
+
 
 --Repeat the last query using aliases
-Select StaffFirstName as 'First Name', StaffLastName as 'Last Name'
-From Staff
+
 
 -- Repeat once again combining the columns into full name
-Select StaffFirstName + ' ' + StaffLastName as 'Staff Name'
-From Staff
+
 
 
 /*
@@ -183,59 +180,88 @@ Simple Selects with 'Where'
 */
 
 -- Who has a staff type ID of 1?
-Select StaffFirstName + ' ' + StaffLastName as 'Staff Name'
-From Staff
-Where StaffTypeID = 1
+
 
 -- What position is that staff typeID?
-Select StaffTypeDescription
-From StaffType
-Where StaffTypeID = 1
+
 
 -- How many items have been rented for more than one day and what project were they for?
-Select ItemID, ProjectID, Days
-From ProjectItem
-Where Days > 1
+
 
 -- Wait! We don't need to see the "Labour" item, do the search again without it
-Select ItemID, ProjectID, Days
-From ProjectItem
-Where Days > 1 and ItemID > 1
+
 
 -- Do any of them have an organization? What is that organization? (Note the default organization is just 'Customer')
-Select ClientFirstName + ' ' + ClientLastName as 'Client Name', Organization
-From Client
-Where Organization not like 'Customer'
+
 
 -- How many client last names start with an M?
-Select count(ClientID)
-From Client
-Where ClientLastName like 'M%'
+
 
 -- What is their name?
-Select ClientFirstName + ' ' + ClientLastName as 'Client Name'
-From Client
-Where ClientLastName like 'M%'
+
 
 -- What about clients that have a first name starting with J?
-Select ClientFirstName + ' ' + ClientLastName as 'Client Name'
-From Client
-Where ClientFirstName like 'J%'
+
 
 -- What clients have 'a' the second letter of their first name?
- Select ClientFirstName + ' ' + ClientLastName as 'Client Name'
-From Client
-Where ClientFirstName like '_a%'
+
 
 --What staff member have more or less than 4 letters in their first name?
-Select StaffFirstName + ' ' + StaffLastName as 'Client Name'
-From Staff
-Where StaffFirstName not like '____'
 
---That's strange... There are 5 staff members! How many don't have 4 letters in their first name?
-Select count(StaffID)
-From Staff
-Where StaffFirstName like '____'
+
+--That's strange... There are staff members! How many don't have 4 letters in their first name?
+
+
+
+
+/*
+------------------------------------------------------------------------------------------
+Simple Selects with date or string functions
+------------------------------------------------------------------------------------------
+*/
+
+--What is the length of the last names and the last name of our clients?
+
+
+--What staff members have a last name 6 letters long?
+
+
+--What are the first 2 letters of each clients name?
+
+
+--Select clients name in the format of first letter of first name.last name Ex J.Doe
+
+
+--Select the staff initials
+
+
+--What is the last 2 letters of each Item description
+
+
+--What is the last 3 characters of each clients postal code?
+
+
+--What are 2nd and 3rd letter of each project description?
+
+
+--What about the 2nd and 5th letter of each client's organization?
+
+
+--What are all the client names in reverse?
+
+
+--What are all the client postal codes in lower case?
+
+
+--What about all the client addresses in Upper case?
+
+
+--What year was the owner hired/the company started? (StaffID = 1)
+
+
+--What month was the first project started in?
+
+
 
 
 /*
@@ -245,49 +271,34 @@ Simple Select aggregates
 */
 
 --What is the average amount we make on a project?
-Select Avg(total)
-From Project
+
 
 -- How much have we made total from projects?
-Select Sum(total)
-From Project
+
 
 --What was the least expensive project?
-Select Min(total)
-From Project
+
 
 --What was the most expensive project?
-Select Max(total)
-From Project
+
 
 --How many projects have we done
-Select Count(total)
-From Project
+
 
 --Just for fun, do all the aggregates in one line!
-Select  Min(total) as 'Min', Max(total) as 'Max', Sum(total) as 'Sum', Avg(total) as 'Avg', Count(total) as 'Count'
-From Project
+
 
 --What is the average amount spent on items?
-Select Avg(ExtPrice)
-From ProjectItem
+
 
 --That's great, but not that useful... What about the average amount spent on each item?
-Select ItemID, Avg(ExtPrice)
-From ProjectItem
-Group by ItemID
+
 
 --Cool! What about the sum too? 
-Select ItemID, Avg(ExtPrice) as 'Avg', Sum(ExtPrice) as 'Sum'
-From ProjectItem
-Group by ItemID
+
 
 -- How much money is spent on each project per item on averge and the total?
-Select ProjectID, Avg(ExtPrice) as 'Avg', Sum(ExtPrice) as 'Sum'
-From ProjectItem
-Group by ProjectID
---These results seem odd, because it's averaging and getting the sum of the price of projects, not items. 
---So the Avg spent per item on project 1 and the sum spent on project 1
+
 
 
 /*
@@ -297,29 +308,19 @@ Simple Selects with 'Order By'
 */
 
 --Select all the project items, we just need the ItemID and Project ID
-Select ItemID, ProjectID
-From ProjectItem
+
 
 -- That's a hard to read table... Order it by the projectID
-Select ItemID, ProjectID
-From ProjectItem
-Order by ProjectID
+
 
 -- Is ordering by the days rented - What are the most used items
-Select ItemID, ProjectID, Days
-From ProjectItem
-Order by Days
+
 
 -- Hm... That goes from shotest rented to longest rented... Try going longest to shortest?
-Select ItemID, ProjectID, Days
-From ProjectItem
-Order by Days desc
+
 
 --We don't need to see labour, we don't rent it out. Take it out of the search.
-Select ItemID, ProjectID, Days
-From ProjectItem
-Where ItemID != 1 -- Can use > 1 in this scenario
-Order by Days desc
+
 
 
 /*
@@ -329,23 +330,13 @@ Unions
 */
 
 --To make sure we know what we are looking for. Select all customers and all staff
-Select ClientFirstName as 'First Name', ClientLastName as 'Last Name' 
-from Client
 
-Select StaffFirstName as 'First Name', StaffLastName  as 'Last Name' 
-from Staff
 
 --Select all the people that we have dealt/worked with Ie: Customers and staff
-Select ClientFirstName as 'First Name', ClientLastName as 'Last Name' from Client
-Union
-Select StaffFirstName, StaffLastName from Staff
+
 
 --What Item types, Staff types and project types do we have?
-Select ItemTypeID as 'ID', ItemTypeDescription as 'Description' From ItemType
-Union
-Select StaffTypeID, StaffTypeDescription From StaffType
-Union
-Select ProjectTypeCode, ProjectTypeDescription From ProjectType
+
 
 
 /*
@@ -355,47 +346,20 @@ Inner Joins
 */
 
 --What are the names of the items from the previous query?
-Select Item.ItemID, ItemDescription, ProjectID, Days
-From ProjectItem
-Inner Join Item on ProjectItem.ItemID = Item.ItemID
-Where Item.ItemID != 1 -- Can use > 1 in this scenario
-Order by Days desc
+
 
 --Awesome! Now we are getting somewhere. What is the name of the projects that those items were used on?
-Select Item.ItemID, ItemDescription, Project.ProjectID, ProjectDescription, Days
-From ProjectItem
-Inner Join Item on ProjectItem.ItemID = Item.ItemID
-Inner Join Project on ProjectItem.ProjectID = Project.ProjectId
-Where Item.ItemID != 1 -- Can use > 1 in this scenario
-Order by Days desc
-
---NOTE: This goes a bit backwards. Generally you want to select from the parent table and join from there. 
---      I did it this way to just make it a bit easier to follow from the previous querty. 
---      You would usually want to go:
---          Select Item.ItemID, ItemDescription, Project.ProjectID, ProjectDescription, Days
---          From Item
---          Inner Join ProjectItem on ProjectItem.ItemID = Item.ItemID
---          Inner Join Project on ProjectItem.ProjectID = Project.ProjectId
 
 
 -- Who was the client for each project?
-Select ProjectID, ProjectDescription, ClientFirstName + ' ' + ClientLastName as 'Client Name'
-From Client
-Inner Join Project on Project.ClientID = Client.ClientID
+
 
 --What items appeared on a project?
-Select Item.ItemID, ItemDescription
-From Item
-Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
+
 
 
 --What project items where on the project for Client 6, and what are the item names?
-Select Item.ItemID, ItemDescription, Project.ProjectID, ProjectDescription, Client.ClientID, ClientFirstName + ' ' + ClientLastName as 'Client Name'
-From Item
-Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
-Inner Join Project on ProjectItem.ProjectID = Project.ProjectId
-Inner Join Client on Project.ClientID = Client.ClientID
-Where Client.ClientID = 6
+
 
 
 /*
@@ -405,23 +369,13 @@ Inner Joins with Aggregates
 */
 
 --How many staff do we have in each staff type?
-Select StaffTypeDescription, Count(StaffID) 'Staff Count'
-From StaffType
-Inner Join Staff on StaffType.StaffTypeID = Staff.StaffTypeID
-Group by StaffTypeDescription
+
 
 --What is the average sale for the staff members that have made a sale?
-Select StaffFirstName + ' ' + StaffLastName as 'Staff Name', Avg(Total) as 'Average Project total'
-From Staff
-Inner Join Project on Project.StaffID = Staff.StaffID
-Group by StaffFirstName, StaffLastName
+
 
 --What is the average amount spent on labour costs? What about the max and min? Display the Id, description and the values.
-Select Item.ItemID, ItemDescription, Avg(ExtPrice) 'Avg spent', min(ExtPrice) 'Min spent', Max(ExtPrice) as 'Max Spent'
-From ProjectItem
-Inner join Item on Item.ItemID = ProjectItem.ItemID
-Where ItemDescription = 'Labour'
-Group by Item.ItemID, ItemDescription
+
 
 
 /*
@@ -431,25 +385,17 @@ Outer Joins
 */
 
 --Select all the clients and their projects - Even if they didnt have a a project
-Select ProjectID, ProjectDescription, ClientFirstName + ' ' + ClientLastName as 'Client Name'
-From Client
-Left Outer Join Project on Project.ClientID = Client.ClientID
+
 
 
 --Do the same with a right outer join
-Select ProjectID, ProjectDescription, ClientFirstName + ' ' + ClientLastName as 'Client Name'
-From Project
-Right Outer Join Client on Project.ClientID = Client.ClientID
+
 
 --Select all items and the project they were used for?
-Select Item.ItemID, ItemDescription, ProjectID
-From Item
-Left Outer Join ProjectItem on Item.ItemID = ProjectItem.ItemID
+
 
 --Again, do the same with a right outer join
-Select Item.ItemID, ItemDescription, ProjectID
-From ProjectItem
-Right Outer Join Item on Item.ItemID = ProjectItem.ItemID
+
 
 
 /*
@@ -459,75 +405,44 @@ All and Distinct
 */
 
 --Select all items that are on a project
-Select Item.ItemID, ItemDescription
-From Item
-Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
+
 
 --That's alot of labour items... I don't think we need to see them all. Just show each item once
-Select Distinct Item.ItemID, ItemDescription
-From Item
-Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
+
 
 --Well, I think we want to see how many times each item appears. Add a column to show how many times the item appears
-Select Distinct Item.ItemID, ItemDescription, count(item.itemID) as 'Item Count'
-From Item
-Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
-group by item.ItemID, ItemDescription
+
 
 --Great! Now just to check. Select all again to make sure they are there
 --Note: The select is a tiny bit different but will give the same result as the first query in this section
-Select All Item.ItemID, ItemDescription
-From Item
-Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
-GO
+
 
 /*
 ------------------------------------------------------------------------------------------
 Views
 Note: These can be finicky with intellisense. Ctrl + Shift + R refreshes intellisense
+	  Views need to be the only statement in a batch. GO makes sure that a new batch starts
 ------------------------------------------------------------------------------------------
 */
 
-GO -- Views need to be the only statement in a batch. GO makes sure that a new batch starts
-
 --Let's make a view that has the clients, their project type, project description, and the staff members that helped them and their type description
-Create View ClientsProjectsStaff
-as
-Select ClientFirstName + ' ' + ClientLastName as 'Client', ProjectTypeDescription, ProjectDescription, StaffFirstName + ' ' + StaffLastName as 'Staff', StaffTypeDescription
-From Client
-Inner Join Project on Project.ClientID = Client.ClientID
-Inner Join ProjectType on ProjectType.ProjectTypeCode = Project.ProjectTypeCode
-Inner Join Staff on Staff.StaffID = Project.StaffID
-Inner Join StaffType on StaffType.StaffTypeID = Staff.StaffTypeID
-GO
+
 
 --Let's see what we made
-Select Client, ProjectTypeDescription, ProjectDescription, Staff, StaffTypeDescription
-From ClientsProjectsStaff
 
-go
 
 --Hmm. I think we should add how much they cost. Alter the view to show the total too.
-Alter View ClientsProjectsStaff
-as
-Select ClientFirstName + ' ' + ClientLastName as 'Client', ProjectTypeDescription, ProjectDescription, total, StaffFirstName + ' ' + StaffLastName as 'Staff', StaffTypeDescription
-From Client
-Inner Join Project on Project.ClientID = Client.ClientID
-Inner Join ProjectType on ProjectType.ProjectTypeCode = Project.ProjectTypeCode
-Inner Join Staff on Staff.StaffID = Project.StaffID
-Inner Join StaffType on StaffType.StaffTypeID = Staff.StaffTypeID
-GO
+
 
 --Let's check the view again
-Select Client, ProjectTypeDescription, ProjectDescription, total, Staff, StaffTypeDescription
-From ClientsProjectsStaff
+
 
 --What was the code to make that view? I don't feel like looking up a few lines...
 --Note: This might be red, but should still work
-SP_HelpText ClientsProjectsStaff
+
 
 --We don't really need that view any more. You can get rid of it
-Drop View ClientsProjectsStaff
+
 
 /*
 ------------------------------------------------------------------------------------------
@@ -536,37 +451,31 @@ SubQueries
 */
 
 --Select the staff types
-Select StaffTypeID, StaffTypeDescription
-From StaffType
+
 
 --Using a subquery, find the owner
-Select StaffFirstName + ' ' + StaffLastName as 'Staff Name'
-From Staff
-Where StaffTypeID = (Select StaffTypeID from StaffType where StaffTypeDescription = 'Owner')
+
 
 --What items have not appeared on a project?
-Select ItemID, ItemDescription
-From Item
-Where ItemID in (Select ItemID from ProjectItem)
+
 
 --What Staff have not done a project?
-Select StaffFirstName + ' ' + StaffLastName as 'Staff Name'
-From Staff
-Where StaffID not in (Select StaffID from Project)
 
 
---Nested subqueries - Subquery in a subquery - Subqueryception!
+--What customers have not done a project?
+
+
+--What staff have a higher than average wage?
+
+
+--Where are our clients from - How many from each city?
+
+
+--Which city has the most students?
+
+
+--More of a challenge just for fun - Nested subqueries - Subquery in a subquery - Subqueryception!
 --What are the staff types from the previous query?
-Select StaffTypeDescription
-From StaffType
-Where StaffTypeID in (Select StaffTypeID 
-                      From Staff
-                      Where StaffID not in (Select StaffID from Project))
+
 
 --What types of items have not been used on a project? 
-Select ItemTypeDescription
-From itemType
-Where ItemTypeID not in (Select ItemTypeID
-                     From Item
-                     Where ItemID in (Select ItemID from ProjectItem))
-
