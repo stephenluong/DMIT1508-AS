@@ -24,6 +24,7 @@ Insert into itemType (ItemTypeID, ItemTypeDescription) Values (1, 'Labour')
 Insert into itemType (ItemTypeID, ItemTypeDescription) Values (2, 'Cameras')
 Insert into itemType (ItemTypeID, ItemTypeDescription) Values (3, 'Microphones')
 Insert into itemType (ItemTypeID, ItemTypeDescription) Values (4, 'Lights')
+Insert into itemType (ItemTypeID, ItemTypeDescription) Values (5, 'Backdrops')
 
 
 --Insert Items - Note ItemID is an identity
@@ -139,14 +140,24 @@ Insert into ProjectItem(ItemID, ProjectID, CheckInNotes, CheckOutNotes, DateOut,
 ------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------
 Select Data From Database
---To add: All and distinct selections, inner joins with aggregates, subqueries, views, unions
 ------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+*/
+
+
+/*
+------------------------------------------------------------------------------------------
+Simple Selects
 ------------------------------------------------------------------------------------------
 */
 
 -- Select all the projects and their info from the project table
 Select ProjectId, ProjectDescription, InDate, OutDate, Estimate, ProjectTypeCode, ClientID, SubTotal, GST, Total, StaffID
 From    Project
+
+-- Who are the clients we have in this database?
+Select ClientFirstName + ' ' + ClientLastName as 'Client Name'
+From Client
 
 -- How many people work here?
 Select count(StaffID)
@@ -165,11 +176,11 @@ Select StaffFirstName + ' ' + StaffLastName as 'Staff Name'
 From Staff
 
 
-
-
-
-
-
+/*
+------------------------------------------------------------------------------------------
+Simple Selects with 'Where'
+------------------------------------------------------------------------------------------
+*/
 
 -- Who has a staff type ID of 1?
 Select StaffFirstName + ' ' + StaffLastName as 'Staff Name'
@@ -190,10 +201,6 @@ Where Days > 1
 Select ItemID, ProjectID, Days
 From ProjectItem
 Where Days > 1 and ItemID > 1
-
--- How many clients do we have in this database? Who are they?
-Select ClientFirstName + ' ' + ClientLastName as 'Client Name'
-From Client
 
 -- Do any of them have an organization? What is that organization? (Note the default organization is just 'Customer')
 Select ClientFirstName + ' ' + ClientLastName as 'Client Name', Organization
@@ -221,7 +228,7 @@ From Client
 Where ClientFirstName like '_a%'
 
 --What staff member have more or less than 4 letters in their first name?
-Select StaffFirstName + ' ' + StaffLastName
+Select StaffFirstName + ' ' + StaffLastName as 'Client Name'
 From Staff
 Where StaffFirstName not like '____'
 
@@ -231,9 +238,11 @@ From Staff
 Where StaffFirstName like '____'
 
 
-
-
-
+/*
+------------------------------------------------------------------------------------------
+Simple Select aggregates
+------------------------------------------------------------------------------------------
+*/
 
 --What is the average amount we make on a project?
 Select Avg(total)
@@ -259,8 +268,6 @@ From Project
 Select  Min(total) as 'Min', Max(total) as 'Max', Sum(total) as 'Sum', Avg(total) as 'Avg', Count(total) as 'Count'
 From Project
 
-
-
 --What is the average amount spent on items?
 Select Avg(ExtPrice)
 From ProjectItem
@@ -275,7 +282,7 @@ Select ItemID, Avg(ExtPrice) as 'Avg', Sum(ExtPrice) as 'Sum'
 From ProjectItem
 Group by ItemID
 
--- How much is spent on each project per item?
+-- How much money is spent on each project per item on averge and the total?
 Select ProjectID, Avg(ExtPrice) as 'Avg', Sum(ExtPrice) as 'Sum'
 From ProjectItem
 Group by ProjectID
@@ -283,10 +290,11 @@ Group by ProjectID
 --So the Avg spent per item on project 1 and the sum spent on project 1
 
 
-
-
-
-
+/*
+------------------------------------------------------------------------------------------
+Simple Selects with 'Order By'
+------------------------------------------------------------------------------------------
+*/
 
 --Select all the project items, we just need the ItemID and Project ID
 Select ItemID, ProjectID
@@ -314,9 +322,37 @@ Where ItemID != 1 -- Can use > 1 in this scenario
 Order by Days desc
 
 
+/*
+------------------------------------------------------------------------------------------
+Unions
+------------------------------------------------------------------------------------------
+*/
+
+--To make sure we know what we are looking for. Select all customers and all staff
+Select ClientFirstName as 'First Name', ClientLastName as 'Last Name' 
+from Client
+
+Select StaffFirstName as 'First Name', StaffLastName  as 'Last Name' 
+from Staff
+
+--Select all the people that we have dealt/worked with Ie: Customers and staff
+Select ClientFirstName as 'First Name', ClientLastName as 'Last Name' from Client
+Union
+Select StaffFirstName, StaffLastName from Staff
+
+--What Item types, Staff types and project types do we have?
+Select ItemTypeID as 'ID', ItemTypeDescription as 'Description' From ItemType
+Union
+Select StaffTypeID, StaffTypeDescription From StaffType
+Union
+Select ProjectTypeCode, ProjectTypeDescription From ProjectType
 
 
-
+/*
+------------------------------------------------------------------------------------------
+Inner Joins
+------------------------------------------------------------------------------------------
+*/
 
 --What are the names of the items from the previous query?
 Select Item.ItemID, ItemDescription, ProjectID, Days
@@ -350,11 +386,11 @@ Inner Join Project on Project.ClientID = Client.ClientID
 --What items appeared on a project?
 Select Item.ItemID, ItemDescription
 From Item
-Inner Join ProjectItem on Item.ItemID = ProjectItem.ProjectID
+Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
 
 
 --What project items where on the project for Client 6, and what are the item names?
-Select Item.ItemID, ItemDescription, Project.ProjectID, ProjectDescription, Client.ClientID, ClientLastName + ' ' + ClientLastName as 'Client Name'
+Select Item.ItemID, ItemDescription, Project.ProjectID, ProjectDescription, Client.ClientID, ClientFirstName + ' ' + ClientLastName as 'Client Name'
 From Item
 Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
 Inner Join Project on ProjectItem.ProjectID = Project.ProjectId
@@ -362,12 +398,43 @@ Inner Join Client on Project.ClientID = Client.ClientID
 Where Client.ClientID = 6
 
 
+/*
+------------------------------------------------------------------------------------------
+Inner Joins with Aggregates
+------------------------------------------------------------------------------------------
+*/
 
+--How many staff do we have in each staff type?
+Select StaffTypeDescription, Count(StaffID) 'Staff Count'
+From StaffType
+Inner Join Staff on StaffType.StaffTypeID = Staff.StaffTypeID
+Group by StaffTypeDescription
+
+--What is the average sale for the staff members that have made a sale?
+Select StaffFirstName + ' ' + StaffLastName as 'Staff Name', Avg(Total) as 'Average Project total'
+From Staff
+Inner Join Project on Project.StaffID = Staff.StaffID
+Group by StaffFirstName, StaffLastName
+
+--What is the average amount spent on labour costs? What about the max and min? Display the Id, description and the values.
+Select Item.ItemID, ItemDescription, Avg(ExtPrice) 'Avg spent', min(ExtPrice) 'Min spent', Max(ExtPrice) as 'Max Spent'
+From ProjectItem
+Inner join Item on Item.ItemID = ProjectItem.ItemID
+Where ItemDescription = 'Labour'
+Group by Item.ItemID, ItemDescription
+
+
+/*
+------------------------------------------------------------------------------------------
+Outer Joins
+------------------------------------------------------------------------------------------
+*/
 
 --Select all the clients and their projects - Even if they didnt have a a project
 Select ProjectID, ProjectDescription, ClientFirstName + ' ' + ClientLastName as 'Client Name'
 From Client
 Left Outer Join Project on Project.ClientID = Client.ClientID
+
 
 --Do the same with a right outer join
 Select ProjectID, ProjectDescription, ClientFirstName + ' ' + ClientLastName as 'Client Name'
@@ -375,11 +442,131 @@ From Project
 Right Outer Join Client on Project.ClientID = Client.ClientID
 
 --Select all items and the project they were used for?
-Select Item.ItemID, ItemDescription
+Select Item.ItemID, ItemDescription, ProjectID
 From Item
-Left Outer Join ProjectItem on Item.ItemID = ProjectItem.ProjectID
+Left Outer Join ProjectItem on Item.ItemID = ProjectItem.ItemID
 
 --Again, do the same with a right outer join
-Select Item.ItemID, ItemDescription
+Select Item.ItemID, ItemDescription, ProjectID
 From ProjectItem
-Right Outer Join Item on Item.ItemID = ProjectItem.ProjectID
+Right Outer Join Item on Item.ItemID = ProjectItem.ItemID
+
+
+/*
+------------------------------------------------------------------------------------------
+All and Distinct
+------------------------------------------------------------------------------------------
+*/
+
+--Select all items that are on a project
+Select Item.ItemID, ItemDescription
+From Item
+Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
+
+--That's alot of labour items... I don't think we need to see them all. Just show each item once
+Select Distinct Item.ItemID, ItemDescription
+From Item
+Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
+
+--Well, I think we want to see how many times each item appears. Add a column to show how many times the item appears
+Select Distinct Item.ItemID, ItemDescription, count(item.itemID) as 'Item Count'
+From Item
+Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
+group by item.ItemID, ItemDescription
+
+--Great! Now just to check. Select all again to make sure they are there
+--Note: The select is a tiny bit different but will give the same result as the first query in this section
+Select All Item.ItemID, ItemDescription
+From Item
+Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
+GO
+
+/*
+------------------------------------------------------------------------------------------
+Views
+Note: These can be finicky with intellisense. Ctrl + Shift + R refreshes intellisense
+------------------------------------------------------------------------------------------
+*/
+
+GO -- Views need to be the only statement in a batch. GO makes sure that a new batch starts
+
+--Let's make a view that has the clients, their project type, project description, and the staff members that helped them and their type description
+Create View ClientsProjectsStaff
+as
+Select ClientFirstName + ' ' + ClientLastName as 'Client', ProjectTypeDescription, ProjectDescription, StaffFirstName + ' ' + StaffLastName as 'Staff', StaffTypeDescription
+From Client
+Inner Join Project on Project.ClientID = Client.ClientID
+Inner Join ProjectType on ProjectType.ProjectTypeCode = Project.ProjectTypeCode
+Inner Join Staff on Staff.StaffID = Project.StaffID
+Inner Join StaffType on StaffType.StaffTypeID = Staff.StaffTypeID
+GO
+
+--Let's see what we made
+Select Client, ProjectTypeDescription, ProjectDescription, Staff, StaffTypeDescription
+From ClientsProjectsStaff
+
+go
+
+--Hmm. I think we should add how much they cost. Alter the view to show the total too.
+Alter View ClientsProjectsStaff
+as
+Select ClientFirstName + ' ' + ClientLastName as 'Client', ProjectTypeDescription, ProjectDescription, total, StaffFirstName + ' ' + StaffLastName as 'Staff', StaffTypeDescription
+From Client
+Inner Join Project on Project.ClientID = Client.ClientID
+Inner Join ProjectType on ProjectType.ProjectTypeCode = Project.ProjectTypeCode
+Inner Join Staff on Staff.StaffID = Project.StaffID
+Inner Join StaffType on StaffType.StaffTypeID = Staff.StaffTypeID
+GO
+
+--Let's check the view again
+Select Client, ProjectTypeDescription, ProjectDescription, total, Staff, StaffTypeDescription
+From ClientsProjectsStaff
+
+--What was the code to make that view? I don't feel like looking up a few lines...
+--Note: This might be red, but should still work
+SP_HelpText ClientsProjectsStaff
+
+--We don't really need that view any more. You can get rid of it
+Drop View ClientsProjectsStaff
+
+/*
+------------------------------------------------------------------------------------------
+SubQueries
+------------------------------------------------------------------------------------------
+*/
+
+--Select the staff types
+Select StaffTypeID, StaffTypeDescription
+From StaffType
+
+--Using a subquery, find the owner
+Select StaffFirstName + ' ' + StaffLastName as 'Staff Name'
+From Staff
+Where StaffTypeID = (Select StaffTypeID from StaffType where StaffTypeDescription = 'Owner')
+
+--What items have not appeared on a project?
+Select ItemID, ItemDescription
+From Item
+Where ItemID in (Select ItemID from ProjectItem)
+
+--What Staff have not done a project?
+Select StaffFirstName + ' ' + StaffLastName as 'Staff Name'
+From Staff
+Where StaffID not in (Select StaffID from Project)
+
+
+--Nested subqueries - Subquery in a subquery - Subqueryception!
+--What are the staff types from the previous query?
+Select StaffTypeDescription
+From StaffType
+Where StaffTypeID in (Select StaffTypeID 
+                      From Staff
+                      Where StaffID not in (Select StaffID from Project))
+
+--What types of items have not been used on a project? 
+Select ItemTypeDescription
+From itemType
+Where ItemTypeID not in (Select ItemTypeID
+                     From Item
+                     Where ItemID in (Select ItemID from ProjectItem))
+
