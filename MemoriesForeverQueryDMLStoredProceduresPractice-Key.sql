@@ -117,6 +117,7 @@ Insert into Project(ProjectDescription, InDate, OutDate, Estimate, ProjectTypeCo
 Insert into Project(ProjectDescription, InDate, OutDate, Estimate, ProjectTypeCode, ClientID, SubTotal, GST, Total, StaffID) Values ('Shooting Basics', 'August 1, 2011', 'August 15, 2011', 600, 1, 7, 595, 29.75, 624.75, 4) --id 3
 Insert into Project(ProjectDescription, InDate, OutDate, Estimate, ProjectTypeCode, ClientID, SubTotal, GST, Total, StaffID) Values ('Tomlinson Grad 2012', 'July 03, 2012', 'August 6, 2012', 800, 5, 6, 760, 38, 798, 3) --id 4
 Insert into Project(ProjectDescription, InDate, OutDate, Estimate, ProjectTypeCode, ClientID, SubTotal, GST, Total, StaffID) Values ('Jackson Dale 3rd Birthday', 'October 28, 2012', 'November 5, 2012', 120, 4, 1, 120, 6, 126, 4) --id 5
+Insert into Project(ProjectDescription, InDate, OutDate, Estimate, ProjectTypeCode, ClientID, SubTotal, GST, Total, StaffID) Values ('Jackson Dale 4th Birthday', 'October 28, 2013', 'November 5, 2013', 130, 4, 1, 120, 6, 126, 4) --id 5
 
 --Insert ProjectItems
 Insert into ProjectItem(ItemID, ProjectID, CheckInNotes, CheckOutNotes, DateOut, DateIn, ExtPrice, Historicalprice, Days) Values (14, 1, ' ', ' ', 'Aug 28, 2010', 'Aug 30, 2010', 40, 40, 2)
@@ -433,7 +434,7 @@ Inner Joins
 ------------------------------------------------------------------------------------------
 */
 
---What are the itemID's, Item Descriptions, ProjectID and days for items that have been on a project? (look back to the last query for "Simple Selects with Order By)
+--What are the names of the items from the previous query?
 Select Item.ItemID, ItemDescription, ProjectID, Days
 From ProjectItem
 Inner Join Item on ProjectItem.ItemID = Item.ItemID
@@ -476,33 +477,6 @@ Inner Join Project on ProjectItem.ProjectID = Project.ProjectId
 Inner Join Client on Project.ClientID = Client.ClientID
 Where Client.ClientID = 6
 
-/*
-------------------------------------------------------------------------------------------
-All and Distinct
-------------------------------------------------------------------------------------------
-*/
-
---Select all items that are on a project
-Select Item.ItemID, ItemDescription
-From Item
-Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
-
---That's alot of labour items... I don't think we need to see them all. Just show each item once
-Select Distinct Item.ItemID, ItemDescription
-From Item
-Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
-
---Well, I think we want to see how many times each item appears. Add a column to show how many times the item appears
-Select Distinct Item.ItemID, ItemDescription, count(item.itemID) as 'Item Count'
-From Item
-Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
-group by item.ItemID, ItemDescription
-
---Great! Now just to check. Select all again to make sure they are there
---Note: The select is a tiny bit different but will give the same result as the first query in this section
-Select All Item.ItemID, ItemDescription
-From Item
-Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
 
 /*
 ------------------------------------------------------------------------------------------
@@ -558,7 +532,33 @@ From ProjectItem
 Right Outer Join Item on Item.ItemID = ProjectItem.ItemID
 
 
+/*
+------------------------------------------------------------------------------------------
+All and Distinct
+------------------------------------------------------------------------------------------
+*/
 
+--Select all items that are on a project
+Select Item.ItemID, ItemDescription
+From Item
+Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
+
+--That's alot of labour items... I don't think we need to see them all. Just show each item once
+Select Distinct Item.ItemID, ItemDescription
+From Item
+Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
+
+--Well, I think we want to see how many times each item appears. Add a column to show how many times the item appears
+Select Distinct Item.ItemID, ItemDescription, count(item.itemID) as 'Item Count'
+From Item
+Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
+group by item.ItemID, ItemDescription
+
+--Great! Now just to check. Select all again to make sure they are there
+--Note: The select is a tiny bit different but will give the same result as the first query in this section
+Select All Item.ItemID, ItemDescription
+From Item
+Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
 GO
 
 /*
@@ -628,7 +628,7 @@ Where StaffTypeID = (Select StaffTypeID from StaffType where StaffTypeDescriptio
 --What items have not appeared on a project?
 Select ItemID, ItemDescription
 From Item
-Where ItemID in (Select ItemID from ProjectItem)
+Where ItemID not in (Select ItemID from ProjectItem)
 
 --What Staff have not done a project?
 Select StaffFirstName + ' ' + StaffLastName as 'Staff Name'
@@ -651,14 +651,13 @@ from Client
 Group By city
 Having Count(ClientID) >= Some (Select Count(ClientID) from Client Group by City)
 
---Which city has the most clients?
+--Which city has the most students?
 Select City, Count(ClientID) as 'Amount of Clients'
 from Client
 Group By city
 Having Count(ClientID) >= All (Select Count(ClientID) from Client Group by City)
 
---More of a challenge - Nested subqueries - Subquery in a subquery - Subqueryception! 
---(They don't really need multiple subqueries, just the way I chose to do these questions for a proof of concept)
+--More of a challenge - Nested subqueries - Subquery in a subquery - Subqueryception!
 --What are the staff types from the previous query?
 Select StaffTypeDescription
 From StaffType
@@ -741,3 +740,170 @@ Where ItemTypeDescription = 'Laptops'
 --Note: Generally you don't want to delete things like staff from databases. You just track their release/fire dates.
 delete Staff
 where StaffFirstName = 'Dwight' and StaffLastName = 'Swanson'
+
+/*
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+Stored Procedures
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+*/
+
+--The way Dan does drops for procedures:
+--If Exists (Select * from INFORMATION_SCHEMA.ROUTINES Where ROUTINE_TYPE = N'PROCEDURE' AND ROUTINE_NAME = '')
+--    Drop Procedure 
+--GO
+
+/*
+------------------------------------------------------------------------------------------
+Stored Procedures - Simple
+------------------------------------------------------------------------------------------
+*/
+
+--Create a stored procedure to list all the clients without a project
+Drop Procedure ClientsWithoutProjects
+
+Create Procedure ClientsWithoutProjects
+As
+Select ClientFirstName + ' ' + ClientLastName as 'Client Name'
+From Client
+Left Outer Join Project on Project.ClientID = Client.ClientID
+Where ProjectID is NULL
+Return
+Go
+
+Exec ClientsWithoutProjects
+
+--Create a procedure to find all the items we haven't used on a project
+Drop Procedure ItemNotUsed
+
+Create Procedure ItemNotUsed
+As
+Select Item.ItemID, ItemDescription
+From Item
+Left Outer Join ProjectItem on ProjectItem.ItemID = Item.ItemID
+Where ProjectID is null
+Return
+Go
+
+Exec ItemNotUsed
+
+--Create a stored procedure to show how many staff members we have of each staff type
+Drop Procedure AmountOfStaffType
+
+Create Procedure AmountOfStaffType
+As
+Select StaffTypeDescription, Count(StaffID) as 'Count'
+From StaffType
+Inner Join Staff on Staff.StaffTypeID = StaffType.StaffTypeID
+Group By StaffTypeDescription
+Return
+Go
+
+Exec AmountOfStaffType
+
+--Create a procedure to find the projects that have earned higher than average total. 
+--Display the ProjectID, Description, Project Type and total
+Drop Procedure HigherThanAverageProjectTotal
+
+Create Procedure HigherThanAverageProjectTotal
+As
+Select ProjectID, ProjectDescription, ProjectTypeDescription, Total
+From Project
+inner join ProjectType on Project.ProjectTypeCode = ProjectType.ProjectTypeCode
+Group By ProjectID, ProjectDescription, ProjectTypeDescription, Total
+Having total >= (Select AVG(Total) from Project)
+Return
+Go
+
+Exec HigherThanAverageProjectTotal
+
+--Create a procedure to find the highest total project. 
+--Display the ProjectID, Description, Project Type and total
+Drop Procedure HighestTotalProject
+
+Create Procedure HighestTotalProject
+AS
+Select ProjectID, ProjectDescription, ProjectTypeDescription, Total
+From Project
+inner join ProjectType on Project.ProjectTypeCode = ProjectType.ProjectTypeCode
+Where total >= ALL (Select total from Project)
+Return
+Go
+
+Exec HighestTotalProject
+
+--Create a procedure to find the client who has spent the most money on projects
+--Display their name and the total they spent
+
+Drop Procedure TopSpendingClient
+
+Create Procedure TopSpendingClient
+As
+Select ClientFirstName + ' ' + ClientLastName, SUM(Total)
+From Client
+Inner Join Project on Client.ClientID = Project.ClientID
+Where Total >= ALL (Select Total From Project)
+Group by ClientFirstName, ClientLastName
+Return
+Go
+
+Exec TopSpendingClient
+
+/*
+------------------------------------------------------------------------------------------
+Stored Procedures - Parameters
+------------------------------------------------------------------------------------------
+*/
+
+--Create a procedure to find projects that have a total greater than a given amount
+--Display the ProjectID, Description, Project Type and total
+Drop Procedure ProjectWithTotalGreaterThan
+
+Create Procedure ProjectWithTotalGreaterThan @_Total int
+As
+Select ProjectID, ProjectDescription, ProjectTypeDescription, Total
+From Project
+Inner Join ProjectType on ProjectType.ProjectTypeCode = Project.ProjectTypeCode
+where total > @_Total
+Return
+Go
+
+Exec ProjectWithTotalGreaterThan 300
+
+--Create a procedure to find how many projects a particular item has been used on
+Drop Procedure NumberOfProjectsItemUsedOn
+
+Create Procedure NumberOfProjectsItemUsedOn @ItemID int
+As
+Select Count(ProjectID) 'Amount of Projects'
+From ProjectItem
+Where ItemID = @ItemID
+Return
+Go
+
+Exec NumberOfProjectsItemUsedOn 1
+Exec NumberOfProjectsItemUsedOn 4
+
+--Create a procedure to show all clients from a given city
+Drop Procedure ClientsFromCity
+
+Create Procedure ClientsFromCity @City varchar(10)
+As
+Select ClientFirstName + ' ' + ClientLastName as 'Client Name'
+From Client
+Where City = @City
+Return
+Go
+
+Exec ClientsFromCity Tomlinson
+Exec ClientsFromCity Westbrook
+
+
+/*
+------------------------------------------------------------------------------------------
+Stored Procedures - Transactions
+------------------------------------------------------------------------------------------
+*/
+
+--COMING SOON!

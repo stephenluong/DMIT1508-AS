@@ -345,7 +345,7 @@ Inner Joins
 ------------------------------------------------------------------------------------------
 */
 
---What are the itemID's, Item Descriptions, ProjectID and days for items that have been on a project? (look back to the last query for "Simple Selects with Order By)
+--What are the names of the items from the previous query?
 
 
 --Awesome! Now we are getting somewhere. What is the name of the projects that those items were used on?
@@ -359,26 +359,6 @@ Inner Joins
 
 
 --What project items where on the project for Client 6, and what are the item names?
-
-
-
-/*
-------------------------------------------------------------------------------------------
-All and Distinct
-------------------------------------------------------------------------------------------
-*/
-
---Select all items that are on a project
-
-
---That's alot of labour items... I don't think we need to see them all. Just show each item once
-
-
---Well, I think we want to see how many times each item appears. Add a column to show how many times the item appears
-
-
---Great! Now just to check. Select all again to make sure they are there
---Note: The select is a tiny bit different but will give the same result as the first query in this section
 
 
 
@@ -418,6 +398,23 @@ Outer Joins
 
 
 
+/*
+------------------------------------------------------------------------------------------
+All and Distinct
+------------------------------------------------------------------------------------------
+*/
+
+--Select all items that are on a project
+
+
+--That's alot of labour items... I don't think we need to see them all. Just show each item once
+
+
+--Well, I think we want to see how many times each item appears. Add a column to show how many times the item appears
+
+
+--Great! Now just to check. Select all again to make sure they are there
+--Note: The select is a tiny bit different but will give the same result as the first query in this section
 
 
 /*
@@ -474,11 +471,10 @@ SubQueries
 --Where are our clients from - How many from each city?
 
 
---Which city has the most clients?
+--Which city has the most students?
 
 
 --More of a challenge just for fun - Nested subqueries - Subquery in a subquery - Subqueryception!
---(They don't really need multiple subqueries, just the way I chose to do these questions for a proof of concept)
 --What are the staff types from the previous query?
 
 
@@ -535,3 +531,57 @@ Delete
 
 --We also had to fire Dwight. Since we don't track releases, delete his record from the database. We will just keep the backup records
 --Note: Generally you don't want to delete things like staff from databases. You just track their release/fire dates.
+
+/*
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+Stored Procedures
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+*/
+
+--The way Dan does drops for procedures:
+--If Exists (Select * from INFORMATION_SCHEMA.ROUTINES Where ROUTINE_TYPE = N'PROCEDURE' AND ROUTINE_NAME = '')
+--    Drop Procedure 
+--GO
+
+/*
+------------------------------------------------------------------------------------------
+Stored Procedures - Simple
+------------------------------------------------------------------------------------------
+*/
+
+--Create a stored procedure to list all the clients without a project
+
+
+--Create a procedure to find all the items we haven't used on a project
+
+--Create a stored procedure to show how many staff members we have of each staff type
+
+
+--Create a procedure to find the projects that have earned higher than average total. 
+--Display the ProjectID, Description, Project Type and total
+
+
+--Create a procedure to find the highest total project. 
+--Display the ProjectID, Description, Project Type and total
+
+
+--Create a procedure to find the client who has spent the most money on projects
+--Display their name and the total they spent
+
+
+/*
+------------------------------------------------------------------------------------------
+Stored Procedures - Parameters
+------------------------------------------------------------------------------------------
+*/
+
+--Create a procedure to find projects that have a total greater than a given amount
+--Display the ProjectID, Description, Project Type and total
+
+
+--Create a procedure to find how many projects a particular item has been used on
+
+
+--Create a procedure to show all clients from a given city
