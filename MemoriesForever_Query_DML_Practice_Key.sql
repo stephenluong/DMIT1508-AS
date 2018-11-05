@@ -433,7 +433,7 @@ Inner Joins
 ------------------------------------------------------------------------------------------
 */
 
---What are the names of the items from the previous query?
+--What are the itemID's, Item Descriptions, ProjectID and days for items that have been on a project? (look back to the last query for "Simple Selects with Order By)
 Select Item.ItemID, ItemDescription, ProjectID, Days
 From ProjectItem
 Inner Join Item on ProjectItem.ItemID = Item.ItemID
@@ -476,6 +476,33 @@ Inner Join Project on ProjectItem.ProjectID = Project.ProjectId
 Inner Join Client on Project.ClientID = Client.ClientID
 Where Client.ClientID = 6
 
+/*
+------------------------------------------------------------------------------------------
+All and Distinct
+------------------------------------------------------------------------------------------
+*/
+
+--Select all items that are on a project
+Select Item.ItemID, ItemDescription
+From Item
+Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
+
+--That's alot of labour items... I don't think we need to see them all. Just show each item once
+Select Distinct Item.ItemID, ItemDescription
+From Item
+Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
+
+--Well, I think we want to see how many times each item appears. Add a column to show how many times the item appears
+Select Distinct Item.ItemID, ItemDescription, count(item.itemID) as 'Item Count'
+From Item
+Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
+group by item.ItemID, ItemDescription
+
+--Great! Now just to check. Select all again to make sure they are there
+--Note: The select is a tiny bit different but will give the same result as the first query in this section
+Select All Item.ItemID, ItemDescription
+From Item
+Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
 
 /*
 ------------------------------------------------------------------------------------------
@@ -531,33 +558,7 @@ From ProjectItem
 Right Outer Join Item on Item.ItemID = ProjectItem.ItemID
 
 
-/*
-------------------------------------------------------------------------------------------
-All and Distinct
-------------------------------------------------------------------------------------------
-*/
 
---Select all items that are on a project
-Select Item.ItemID, ItemDescription
-From Item
-Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
-
---That's alot of labour items... I don't think we need to see them all. Just show each item once
-Select Distinct Item.ItemID, ItemDescription
-From Item
-Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
-
---Well, I think we want to see how many times each item appears. Add a column to show how many times the item appears
-Select Distinct Item.ItemID, ItemDescription, count(item.itemID) as 'Item Count'
-From Item
-Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
-group by item.ItemID, ItemDescription
-
---Great! Now just to check. Select all again to make sure they are there
---Note: The select is a tiny bit different but will give the same result as the first query in this section
-Select All Item.ItemID, ItemDescription
-From Item
-Inner Join ProjectItem on Item.ItemID = ProjectItem.ItemID
 GO
 
 /*
@@ -650,13 +651,14 @@ from Client
 Group By city
 Having Count(ClientID) >= Some (Select Count(ClientID) from Client Group by City)
 
---Which city has the most students?
+--Which city has the most clients?
 Select City, Count(ClientID) as 'Amount of Clients'
 from Client
 Group By city
 Having Count(ClientID) >= All (Select Count(ClientID) from Client Group by City)
 
---More of a challenge - Nested subqueries - Subquery in a subquery - Subqueryception!
+--More of a challenge - Nested subqueries - Subquery in a subquery - Subqueryception! 
+--(They don't really need multiple subqueries, just the way I chose to do these questions for a proof of concept)
 --What are the staff types from the previous query?
 Select StaffTypeDescription
 From StaffType

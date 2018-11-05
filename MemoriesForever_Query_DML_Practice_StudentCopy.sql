@@ -345,7 +345,7 @@ Inner Joins
 ------------------------------------------------------------------------------------------
 */
 
---What are the names of the items from the previous query?
+--What are the itemID's, Item Descriptions, ProjectID and days for items that have been on a project? (look back to the last query for "Simple Selects with Order By)
 
 
 --Awesome! Now we are getting somewhere. What is the name of the projects that those items were used on?
@@ -359,6 +359,26 @@ Inner Joins
 
 
 --What project items where on the project for Client 6, and what are the item names?
+
+
+
+/*
+------------------------------------------------------------------------------------------
+All and Distinct
+------------------------------------------------------------------------------------------
+*/
+
+--Select all items that are on a project
+
+
+--That's alot of labour items... I don't think we need to see them all. Just show each item once
+
+
+--Well, I think we want to see how many times each item appears. Add a column to show how many times the item appears
+
+
+--Great! Now just to check. Select all again to make sure they are there
+--Note: The select is a tiny bit different but will give the same result as the first query in this section
 
 
 
@@ -398,23 +418,6 @@ Outer Joins
 
 
 
-/*
-------------------------------------------------------------------------------------------
-All and Distinct
-------------------------------------------------------------------------------------------
-*/
-
---Select all items that are on a project
-
-
---That's alot of labour items... I don't think we need to see them all. Just show each item once
-
-
---Well, I think we want to see how many times each item appears. Add a column to show how many times the item appears
-
-
---Great! Now just to check. Select all again to make sure they are there
---Note: The select is a tiny bit different but will give the same result as the first query in this section
 
 
 /*
@@ -471,10 +474,11 @@ SubQueries
 --Where are our clients from - How many from each city?
 
 
---Which city has the most students?
+--Which city has the most clients?
 
 
 --More of a challenge just for fun - Nested subqueries - Subquery in a subquery - Subqueryception!
+--(They don't really need multiple subqueries, just the way I chose to do these questions for a proof of concept)
 --What are the staff types from the previous query?
 
 
