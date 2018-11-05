@@ -658,7 +658,8 @@ Group By city
 Having Count(ClientID) >= All (Select Count(ClientID) from Client Group by City)
 
 --More of a challenge - Nested subqueries - Subquery in a subquery - Subqueryception!
---What are the staff types from the previous query?
+--(They don't necessarily need multiple subqueries, just the way I chose to do these questions for a proof of concept)
+--What are the staff types that have not done a project?
 Select StaffTypeDescription
 From StaffType
 Where StaffTypeID in (Select StaffTypeID 

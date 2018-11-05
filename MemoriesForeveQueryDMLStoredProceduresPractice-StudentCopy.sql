@@ -475,7 +475,8 @@ SubQueries
 
 
 --More of a challenge just for fun - Nested subqueries - Subquery in a subquery - Subqueryception!
---What are the staff types from the previous query?
+--(They don't necessarily need multiple subqueries, just the way I chose to do these questions for a proof of concept)
+--What are the staff types that have not done a project?
 
 
 --What types of items have not been used on a project? 
