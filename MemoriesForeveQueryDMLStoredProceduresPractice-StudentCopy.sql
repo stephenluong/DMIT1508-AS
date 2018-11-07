@@ -586,3 +586,15 @@ Stored Procedures - Parameters
 
 
 --Create a procedure to show all clients from a given city
+
+
+--Create a procedure to select the projects (ID + Description) created by a given staff member
+
+
+--Create a procedure to find out how many projects, and how much a given client has spent
+
+
+--Alter the previous procedure to include who the client is 
+
+
+

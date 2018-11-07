@@ -111,6 +111,7 @@ Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, 
 Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Tomlinson Minor Hockey', 'Warren', 'Jackson', 7808856468, 'HeadCoach@TomlinsonHockey.com', '11 Pear St', 'Tomlinson', 'AB', 'T9T1Y7') --id 7
 Insert into Client(Organization, ClientFirstName, ClientLastName, Phone, Email, Address, City, Province, PC) Values ('Tomlinson Event Centre', 'Jane', 'Sutherland', 7804256897, 'JaneSuth@Tomlinson.com', '16 Main St', 'Tomlinson', 'AB', 'T5O4X5') --id 8
 
+
 --Insert Projects - Note ProjectID is an identity                                                                                    (ProjectDescription, InDate, OutDate, Estimate, ProjectTypeCode, ClientID, SubTotal, GST, Total, StaffID)
 Insert into Project(ProjectDescription, InDate, OutDate, Estimate, ProjectTypeCode, ClientID, SubTotal, GST, Total, StaffID) Values ('Helgason Family Reunion', 'September 14, 2010', 'September 28, 2010', 200, 2, 5, 250, 13.50, 263.50, 3) --id 1
 Insert into Project(ProjectDescription, InDate, OutDate, Estimate, ProjectTypeCode, ClientID, SubTotal, GST, Total, StaffID) Values ('McMillan Wedding', 'March 4, 2011', 'May 2, 2011', 300, 3, 3, 320, 16, 336, 4) --id 2
@@ -853,7 +854,7 @@ Exec TopSpendingClient
 
 /*
 ------------------------------------------------------------------------------------------
-Stored Procedures - Parameters
+Stored Procedures - Selects with Parameters
 ------------------------------------------------------------------------------------------
 */
 
@@ -861,13 +862,18 @@ Stored Procedures - Parameters
 --Display the ProjectID, Description, Project Type and total
 Drop Procedure ProjectWithTotalGreaterThan
 
-Create Procedure ProjectWithTotalGreaterThan @_Total int
+Create Procedure ProjectWithTotalGreaterThan @Total int
 As
-Select ProjectID, ProjectDescription, ProjectTypeDescription, Total
-From Project
-Inner Join ProjectType on ProjectType.ProjectTypeCode = Project.ProjectTypeCode
-where total > @_Total
-Return
+If @Total is null
+	Begin
+	RaisError('Please enter a total',16,1)
+	End
+Else
+	Select ProjectID, ProjectDescription, ProjectTypeDescription, Total
+	From Project
+	Inner Join ProjectType on ProjectType.ProjectTypeCode = Project.ProjectTypeCode
+	where total > @_Total
+	Return
 Go
 
 Exec ProjectWithTotalGreaterThan 300
@@ -877,14 +883,40 @@ Drop Procedure NumberOfProjectsItemUsedOn
 
 Create Procedure NumberOfProjectsItemUsedOn @ItemID int
 As
-Select Count(ProjectID) 'Amount of Projects'
-From ProjectItem
-Where ItemID = @ItemID
+If @ItemID is null
+	Begin
+		RaisError('Please enter an item ID',16,1)
+	End
+Else
+	If exists (select ItemID from Item where ItemID = @ItemID)
+		Begin
+			Select Count(ProjectID) 'Amount of Projects'
+			From ProjectItem
+			Where ItemID = @ItemID
+		End
+	Else
+		Begin
+			RaisError('ItemID does not exist. Please enter a valid ItemID',16,1)
+		End
 Return
 Go
 
 Exec NumberOfProjectsItemUsedOn 1
 Exec NumberOfProjectsItemUsedOn 4
+
+
+
+/*
+
+
+ADDING ERROR HANDLING
+
+
+*/
+
+
+
+
 
 --Create a procedure to show all clients from a given city
 Drop Procedure ClientsFromCity
@@ -900,6 +932,46 @@ Go
 Exec ClientsFromCity Tomlinson
 Exec ClientsFromCity Westbrook
 
+--Create a procedure to select the projects (ID + Description) created by a given staff member
+Drop Procedure ProjectsByStaff
+
+Create Procedure ProjectsByStaff @StaffID int
+as
+Select ProjectID, ProjectDescription
+From Project
+Where StaffID = @StaffID
+Return
+GO 
+
+Exec ProjectsByStaff 3
+Exec ProjectsByStaff 4
+
+--Create a procedure to find out how many projects, and how much a given client has spent
+Drop Procedure ProjectsAndTotalByClient
+
+Create Procedure ProjectsAndTotalByClient @ClientID int
+as
+Select Count(ProjectID) as 'Project Count', Sum(Total) as 'Projects Total'
+From Project
+Where ClientID = @ClientID
+Return
+GO
+
+Exec ProjectsAndTotalByClient 1
+
+--Alter the previous procedure to include who the client is 
+Alter Procedure ProjectsAndTotalByClient @ClientID int
+as
+Select Count(ProjectID) as 'Project Count', Sum(Total) as 'Projects Total', ClientFirstName + ' ' + ClientLastName as 'Client Name'
+From Project
+Inner Join Client on Client.ClientID = Project.ClientID
+Where Client.ClientID = @ClientID
+Group by ClientFirstName, ClientLastName
+Return
+GO
+
+Exec ProjectsAndTotalByClient 1
+
 
 /*
 ------------------------------------------------------------------------------------------
@@ -907,4 +979,4 @@ Stored Procedures - Transactions
 ------------------------------------------------------------------------------------------
 */
 
---COMING SOON!
+--Add ProjectItem
