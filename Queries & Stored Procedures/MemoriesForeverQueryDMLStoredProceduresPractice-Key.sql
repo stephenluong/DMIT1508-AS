@@ -7,7 +7,7 @@ Note: The check constrant for HireDate in the Staff table and the InDate & OutDa
 	constraint ck_dates check (InDate <=OutDate)
 
 The data and inserts in this sql file were created by Aric Smith for Supplemental Learning sessions in Fall 2018.
-Contact info: arics@nait.ca or aricsmith35@gmail.com
+Contact info: arics@nait.ca
 */
 
 
@@ -938,3 +938,6 @@ Stored Procedures - Transactions
 */
 
 --COMING SOON!
+
+
+
