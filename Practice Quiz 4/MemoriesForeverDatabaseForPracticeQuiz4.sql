@@ -1,4 +1,6 @@
---Create database MemoriesForever
+--Create database MemoriesForeverPracticeQuiz4
+
+use [MemoriesForeverPracticeQuiz4]
 
 drop table projectitem
 drop table project
@@ -51,7 +53,7 @@ constraint df_wage default 9.5
 constraint ck_wage check(Wage >0),
 HireDate datetime not null,
 StaffTypeID int not null constraint fk_StaffToStaffType references StaffType(StaffTypeID),
-constraint ck_hiredate check(HireDate <= getdate())
+--constraint ck_hiredate check(HireDate <= getdate())
 )
 
 Create Table Item
@@ -70,7 +72,7 @@ InDate datetime not null,
 OutDate datetime not null,
 Estimate money not null constraint df_Estimate default 0,
 ProjectTypeCode int not null constraint fk_ProjectToProjectType references ProjectType(ProjectTypeCode),
-ClientID int not null constraint fk_ProjectToClient references Client(ClientID),
+ClientID int not null, --constraint fk_ProjectToClient references Client(ClientID),
 SubTotal money not null,
 GST money not null,
 Total money not null,

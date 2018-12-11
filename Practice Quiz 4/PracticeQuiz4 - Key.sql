@@ -15,6 +15,7 @@ Note: The check constrant for HireDate in the Staff table and the InDate & OutDa
 	Contact info: arics@nait.ca
 */
 
+use [MemoriesForeverPracticeQuiz4]
 
 --1. Create an insert/update trigger that will ensure that a staff's hire date is valid (before the current date)
 
@@ -134,7 +135,7 @@ as
 		begin
 			if exists (Select * from inserted 
 						inner join deleted on inserted.itemid = deleted.ItemID
-						where inserted.PricePerDay * 1.15 > deleted.PricePerDay or inserted.PricePerDay * 0.85 < deleted.PricePerDay)
+						where inserted.PricePerDay > deleted.PricePerDay * 1.15 or inserted.PricePerDay < deleted.PricePerDay * 0.85)
 				begin
 					RaisError('Price change is too much, make sure it is less that a 15 percent change', 16, 1)
 					Rollback Transaction
@@ -153,19 +154,16 @@ as
 return
 go
 
-select * from Item
-
-Update Item
+--Testing
+Update Item		--Fails
 set PricePerDay = 800
 where ItemID = 1
 
-Update Item
+Update Item		--Fails
 set PricePerDay = 8
 where ItemID = 1
 
-Update Item
+Update Item		--Passes
 set PricePerDay = 85
 where ItemID = 1
-
-
-
+go
