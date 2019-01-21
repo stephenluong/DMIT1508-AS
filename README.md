@@ -4,4 +4,4 @@ This is the repository (collection of files) that has been used for Aric's Suppl
 
 Contact: AricS@Nait.ca
 
-![][DMIT1508Winter2019SLSessionWeeklySchedule]
+
